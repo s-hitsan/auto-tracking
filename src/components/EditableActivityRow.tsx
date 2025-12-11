@@ -1,5 +1,4 @@
-import React, { useState, useEffect, ChangeEvent } from "react";
-import { toast } from "react-toastify";
+import React, { useState, ChangeEvent } from "react";
 import "./ActivityFormRow.css";
 import NameAutocomplete from "./NameAutocomplete";
 import EstablishmentAutocomplete from "./EstablishmentAutocomplete";

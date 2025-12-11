@@ -14,20 +14,16 @@ function NameAutocomplete({ value, onChange, placeholder, required }: NameAutoco
   const [allNames, setAllNames] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
   const [inputValue, setInputValue] = useState<string>(value || '');
-  const [loading, setLoading] = useState<boolean>(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   // Функція для завантаження унікальних імен з бази даних
   const loadNames = async (): Promise<void> => {
     try {
-      setLoading(true);
       const names = await getUniqueMainPersons();
       setAllNames(names);
     } catch (error) {
       console.error('Помилка завантаження імен:', error);
       setAllNames([]);
-    } finally {
-      setLoading(false);
     }
   };
 

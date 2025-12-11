@@ -1,0 +1,139 @@
+.table-container {
+  background: #2d2d2d;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  overflow-x: auto;
+}
+
+.activity-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.activity-table thead {
+  background-color: #252525;
+}
+
+.activity-table th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #e0e0e0;
+  border-bottom: 2px solid #444;
+  white-space: nowrap;
+}
+
+.activity-table th:first-child {
+  width: 60px;
+  text-align: center;
+}
+
+.activity-table th:nth-child(2) {
+  width: 100px;
+}
+
+.activity-table th:nth-child(3) {
+  width: 80px;
+  text-align: center;
+}
+
+.activity-table th:nth-child(4) {
+  width: 60px;
+  text-align: center;
+  padding: 12px 4px;
+}
+
+.activity-table td {
+  padding: 12px;
+  border-bottom: 1px solid #444;
+  word-break: break-word;
+  color: #e0e0e0;
+}
+
+.activity-table td:first-child {
+  text-align: center;
+}
+
+.activity-table td:nth-child(2) {
+  text-align: center;
+  white-space: nowrap;
+  font-family: monospace;
+}
+
+.activity-table td:nth-child(3) {
+  text-align: center;
+}
+
+.activity-table td:nth-child(4) {
+  text-align: center;
+  font-size: 20px;
+  padding: 12px 4px;
+  width: 60px;
+}
+
+.activity-table tbody tr:hover {
+  background-color: #3a3a3a;
+}
+
+.link-cell {
+  color: #4a9eff;
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.link-cell:hover {
+  text-decoration: underline;
+  color: #6bb3ff;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 14px;
+}
+
+.btn-icon {
+  padding: 6px 10px;
+  min-width: 36px;
+  font-size: 16px;
+  line-height: 1;
+  color: white;
+}
+
+.empty-row {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+  font-style: italic;
+}
+
+.coordinates-clickable {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s;
+}
+
+.coordinates-clickable:hover {
+  background-color: #3a4a5a;
+}
+
+@media (max-width: 768px) {
+  .activity-table {
+    font-size: 14px;
+  }
+  
+  .activity-table th,
+  .activity-table td {
+    padding: 8px;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+  }
+}
+

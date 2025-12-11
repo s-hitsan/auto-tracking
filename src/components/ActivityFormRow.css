@@ -1,0 +1,145 @@
+.form-row {
+  background-color: #2a2a2a;
+  border-bottom: 2px solid #4a9eff;
+}
+
+.form-row:hover {
+  background-color: #333;
+}
+
+.editing-row {
+  background-color: #3a2a1a !important;
+  border: 2px solid #ffa500;
+}
+
+.form-cell {
+  padding: 8px 12px;
+  vertical-align: middle;
+}
+
+.form-input {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #555;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: inherit;
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #4a9eff;
+  box-shadow: 0 0 0 2px rgba(74, 158, 255, 0.25);
+}
+
+.form-input::placeholder {
+  color: #888;
+}
+
+.form-select {
+  cursor: pointer;
+  color: #e0e0e0;
+}
+
+.form-select option {
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+}
+
+.form-actions-cell {
+  white-space: nowrap;
+}
+
+.form-row-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+
+.form-row-actions .btn-sm {
+  padding: 6px 12px;
+  font-size: 16px;
+  min-width: 36px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.time-cell {
+  white-space: nowrap;
+}
+
+.time-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.time-input {
+  flex: 1;
+  min-width: 90px;
+  max-width: 120px;
+}
+
+.btn-time-refresh {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0;
+  transition: background-color 0.2s, transform 0.2s;
+  flex-shrink: 0;
+}
+
+.btn-time-refresh:hover {
+  background-color: #5a6268;
+  transform: rotate(180deg);
+}
+
+.btn-time-refresh:active {
+  transform: rotate(360deg);
+}
+
+.transport-cell {
+  text-align: center;
+}
+
+.transport-select {
+  min-width: 60px;
+  max-width: 70px;
+  text-align: center;
+  padding: 6px 4px;
+}
+
+@media (max-width: 768px) {
+  .form-cell {
+    padding: 6px 8px;
+  }
+  
+  .form-input {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+  
+  .time-select {
+    min-width: 50px;
+    font-size: 12px;
+  }
+  
+  .form-row-actions {
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+

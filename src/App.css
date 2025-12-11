@@ -1,0 +1,166 @@
+.App {
+  min-height: 100vh;
+}
+
+.App-header {
+  background-color: #1e1e1e;
+  padding: 20px;
+  color: #e0e0e0;
+  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 15px;
+  border-bottom: 1px solid #333;
+}
+
+.stats-container {
+  display: flex;
+  gap: 30px;
+  align-items: left;
+  flex-wrap: wrap;
+  flex-direction: column;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stat-label {
+  color: #999;
+  font-size: 14px;
+}
+
+.stat-value {
+  color: #e0e0e0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.establishment-stats {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.establishment-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: opacity 0.2s;
+}
+
+.establishment-toggle:hover {
+  opacity: 0.8;
+}
+
+.toggle-icon {
+  font-size: 10px;
+  color: #999;
+  margin-left: 4px;
+}
+
+.establishment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+}
+
+.establishment-stat-item {
+  display: flex;
+  gap: 6px;
+  font-size: 13px;
+  color: #ccc;
+}
+
+.establishment-name {
+  font-weight: 500;
+  color: #e0e0e0;
+}
+
+.establishment-values {
+  color: #999;
+}
+
+.App-header h1 {
+  margin: 0;
+  font-size: 2rem;
+  flex: 1;
+}
+
+.export-btn {
+  margin: 0;
+  padding: 10px 20px;
+  font-size: 14px;
+}
+
+.App-main {
+  padding: 40px 20px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+  margin-bottom: 20px;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #545b62;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: #c82333;
+}
+
+.btn-success {
+  background-color: #28a745;
+  color: white;
+}
+
+.btn-success:hover {
+  background-color: #218838;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  font-size: 18px;
+  color: #999;
+}
+
+.form-wrapper {
+  margin-bottom: 30px;
+}
+

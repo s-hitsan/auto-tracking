@@ -14,6 +14,7 @@ import {
 } from "./services/activityService";
 import { toast } from "react-toastify";
 import { Activity, CreateActivityDto, CreateDetailDto } from "./types";
+import { parseActivityFromClipboard } from "./utils/parseActivity";
 
 function App() {
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -126,6 +127,62 @@ function App() {
     } catch (error) {
       console.error("Помилка копіювання:", error);
       toast.error("Помилка копіювання в буфер обміну");
+    }
+  };
+
+  const handlePasteActivity = async (): Promise<void> => {
+    try {
+      const text = await navigator.clipboard.readText();
+      const parsed = parseActivityFromClipboard(text);
+
+      if (!parsed) {
+        toast.error("Не вдалося розпізнати формат події з буфера обміну");
+        return;
+      }
+
+      // Конвертуємо FormData в CreateActivityDto
+      const [hour, minute] = (parsed.time || "00:00").split(":");
+      const activityData: CreateActivityDto = {
+        hour: hour || "00",
+        minute: minute || "00",
+        mainPerson: parsed.mainPerson?.trim() || "",
+        participantsCount: parsed.participantsCount
+          ? parseInt(parsed.participantsCount)
+          : 1,
+        transportType:
+          parsed.transportType === "walk" || parsed.transportType === "car"
+            ? parsed.transportType
+            : null,
+        greenCount: parsed.greenCount ? parseInt(parsed.greenCount) : null,
+        yellowCount: parsed.yellowCount ? parseInt(parsed.yellowCount) : null,
+        redCount: parsed.redCount ? parseInt(parsed.redCount) : null,
+        direction:
+          parsed.direction === "+" ||
+          parsed.direction === "-" ||
+          parsed.direction === "="
+            ? parsed.direction
+            : null,
+        coordinates: parsed.coordinates?.trim() || null,
+        establishment: parsed.establishment?.trim() || null,
+        department:
+          parsed.department === "літуни" || parsed.department === "тіхоні"
+            ? parsed.department
+            : null,
+        link: parsed.link?.trim() || null,
+        comment: parsed.comment?.trim() || null,
+      };
+
+      // Перевірка обов'язкових полів
+      if (!activityData.mainPerson) {
+        toast.error("Помилка: відсутнє поле 'Стрім' (Екіпаж)");
+        return;
+      }
+
+      await handleCreate(activityData);
+      toast.success("Подію успішно вставлено з буфера обміну!");
+    } catch (error) {
+      console.error("Помилка вставки події:", error);
+      toast.error("Помилка вставки події з буфера обміну");
     }
   };
 
@@ -300,13 +357,22 @@ function App() {
             )}
           </div>
         </div>
-        <button
-          className="btn btn-primary export-btn"
-          onClick={handleExport}
-          title="Експортувати в Markdown"
-        >
-          📥 Експортувати
-        </button>
+        <div className="header-actions">
+          <button
+            className="btn btn-success paste-activity-btn"
+            onClick={handlePasteActivity}
+            title="Вставити подію з буфера обміну"
+          >
+            📥 Вставити подію
+          </button>
+          <button
+            className="btn btn-primary export-btn"
+            onClick={handleExport}
+            title="Експортувати в Markdown"
+          >
+            📥 Експортувати
+          </button>
+        </div>
       </header>
       <main className="App-main">
         <div className="container">

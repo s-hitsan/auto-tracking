@@ -85,7 +85,8 @@
   max-width: 120px;
 }
 
-.btn-time-refresh {
+.btn-time-refresh,
+.btn-paste-activity {
   background-color: #6c757d;
   color: white;
   border: none;
@@ -109,6 +110,15 @@
 
 .btn-time-refresh:active {
   transform: rotate(360deg);
+}
+
+.btn-paste-activity:hover {
+  background-color: #5a6268;
+  transform: scale(1.1);
+}
+
+.btn-paste-activity:active {
+  transform: scale(0.95);
 }
 
 .transport-cell {

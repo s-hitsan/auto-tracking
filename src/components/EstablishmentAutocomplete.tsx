@@ -19,20 +19,16 @@ function EstablishmentAutocomplete({
   const [allEstablishments, setAllEstablishments] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
   const [inputValue, setInputValue] = useState<string>(value || "");
-  const [loading, setLoading] = useState<boolean>(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   // Функція для завантаження унікальних закладів з бази даних
   const loadEstablishments = async (): Promise<void> => {
     try {
-      setLoading(true);
       const establishments = await getUniqueEstablishments();
       setAllEstablishments(establishments);
     } catch (error) {
       console.error("Помилка завантаження закладів:", error);
       setAllEstablishments([]);
-    } finally {
-      setLoading(false);
     }
   };
 

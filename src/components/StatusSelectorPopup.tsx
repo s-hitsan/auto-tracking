@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import "./StatusSelectorPopup.css";
 
 interface StatusSelectorPopupProps {
@@ -116,10 +116,7 @@ function StatusSelectorPopup({
           </div>
         </div>
         <div className="status-popup-footer">
-          <button
-            className="btn btn-success btn-sm"
-            onClick={onClose}
-          >
+          <button className="btn btn-success btn-sm" onClick={onClose}>
             Готово
           </button>
         </div>
@@ -129,4 +126,3 @@ function StatusSelectorPopup({
 }
 
 export default StatusSelectorPopup;
-

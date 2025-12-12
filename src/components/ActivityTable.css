@@ -287,8 +287,8 @@
   padding: 0;
   border: none;
   border-radius: 3px;
-  background-color: #dc3545;
-  color: white;
+  background-color: #666;
+  color: #ccc;
   font-size: 11px;
   line-height: 1;
   cursor: pointer;
@@ -296,19 +296,24 @@
   align-items: center;
   justify-content: center;
   z-index: 10;
-  opacity: 0.7;
-  transition: opacity 0.2s, transform 0.2s;
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.2s, background-color 0.2s;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
+.main-row:hover .delete-btn-corner,
+.detail-row:hover .delete-btn-corner {
+  opacity: 0.6;
+}
+
 .delete-btn-corner:hover {
-  opacity: 1;
-  transform: scale(1.15);
-  background-color: #c82333;
+  opacity: 0.9 !important;
+  transform: scale(1.1);
+  background-color: #777;
 }
 
 .delete-btn-corner:active {
-  transform: scale(0.9);
+  transform: scale(0.95);
 }
 
 .detail-row {

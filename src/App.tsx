@@ -363,14 +363,14 @@ function App() {
             onClick={handlePasteActivity}
             title="Вставити подію з буфера обміну"
           >
-            📥 Вставити подію
+            📋 Вставити подію
           </button>
           <button
             className="btn btn-primary export-btn"
             onClick={handleExport}
             title="Експортувати в Markdown"
           >
-            📥 Експортувати
+            📤 Експортувати
           </button>
         </div>
       </header>

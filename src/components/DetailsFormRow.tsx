@@ -214,24 +214,6 @@ function DetailsFormRow({ parentId, onSubmit }: DetailsFormRowProps) {
           ))}
         </select>
       </td>
-      <td className="form-cell">
-        <input
-          type="text"
-          name="coordinates"
-          value={formData.coordinates}
-          onChange={handleChange}
-          placeholder="Координати"
-          className="form-input"
-        />
-      </td>
-      <td className="form-cell">
-        <NameAutocomplete
-          value={formData.mainPerson}
-          onChange={handleNameChange}
-          placeholder="Стрім"
-          required
-        />
-      </td>
       <td className="form-cell status-cell">
         <div
           className={`status-trigger ${
@@ -285,6 +267,24 @@ function DetailsFormRow({ parentId, onSubmit }: DetailsFormRowProps) {
             participantsOptions={participantsOptions}
           />
         )}
+      </td>
+      <td className="form-cell">
+        <input
+          type="text"
+          name="coordinates"
+          value={formData.coordinates}
+          onChange={handleChange}
+          placeholder="Координати"
+          className="form-input"
+        />
+      </td>
+      <td className="form-cell">
+        <NameAutocomplete
+          value={formData.mainPerson}
+          onChange={handleNameChange}
+          placeholder="Стрім"
+          required
+        />
       </td>
       <td className="form-cell">
         <input type="hidden" name="link" value={formData.link} />

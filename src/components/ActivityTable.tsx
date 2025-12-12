@@ -313,9 +313,9 @@ function ActivityTable({
                             <tr>
                               <th>Час</th>
                               <th>Кількість</th>
+                              <th>Статус</th>
                               <th>Координати</th>
                               <th>Стрім</th>
-                              <th>Статус</th>
                               <th>Посилання</th>
                               <th>Коментар</th>
                               <th></th>
@@ -335,6 +335,40 @@ function ActivityTable({
                                   <td>
                                     {detail.participantsCount ||
                                       EMPTY_CELL_LABEL}
+                                  </td>
+                                  <td className="status-cell">
+                                    {detail.greenCount ||
+                                    detail.yellowCount ||
+                                    detail.redCount ? (
+                                      <div className="status-distribution">
+                                        {detail.greenCount ? (
+                                          <span
+                                            className="status-item status-green"
+                                            title="Зелений"
+                                          >
+                                            {detail.greenCount}●
+                                          </span>
+                                        ) : null}
+                                        {detail.yellowCount ? (
+                                          <span
+                                            className="status-item status-yellow"
+                                            title="Жовтий"
+                                          >
+                                            {detail.yellowCount}●
+                                          </span>
+                                        ) : null}
+                                        {detail.redCount ? (
+                                          <span
+                                            className="status-item status-red"
+                                            title="Червоний"
+                                          >
+                                            {detail.redCount}●
+                                          </span>
+                                        ) : null}
+                                      </div>
+                                    ) : (
+                                      EMPTY_CELL_LABEL
+                                    )}
                                   </td>
                                   <td
                                     className={
@@ -382,40 +416,6 @@ function ActivityTable({
                                     {detail.coordinates || EMPTY_CELL_LABEL}
                                   </td>
                                   <td>{detail.mainPerson}</td>
-                                  <td className="status-cell">
-                                    {detail.greenCount ||
-                                    detail.yellowCount ||
-                                    detail.redCount ? (
-                                      <div className="status-distribution">
-                                        {detail.greenCount ? (
-                                          <span
-                                            className="status-item status-green"
-                                            title="Зелений"
-                                          >
-                                            {detail.greenCount}●
-                                          </span>
-                                        ) : null}
-                                        {detail.yellowCount ? (
-                                          <span
-                                            className="status-item status-yellow"
-                                            title="Жовтий"
-                                          >
-                                            {detail.yellowCount}●
-                                          </span>
-                                        ) : null}
-                                        {detail.redCount ? (
-                                          <span
-                                            className="status-item status-red"
-                                            title="Червоний"
-                                          >
-                                            {detail.redCount}●
-                                          </span>
-                                        ) : null}
-                                      </div>
-                                    ) : (
-                                      EMPTY_CELL_LABEL
-                                    )}
-                                  </td>
                                   <td>
                                     {detail.link ? (
                                       <a

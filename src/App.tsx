@@ -201,20 +201,40 @@ function App() {
     return sum;
   }, 0);
 
-  // Статистика напрямків (загальна)
+  // Статистика напрямків (за кількістю учасників)
   const directionStats = activities.reduce(
     (acc, activity) => {
+      const participants = activity.participantsCount || 0;
       if (activity.direction === "+") {
-        acc.plus += 1;
+        acc.plus += participants;
       } else if (activity.direction === "-") {
-        acc.minus += 1;
+        acc.minus += participants;
       } else if (activity.direction === "=") {
-        acc.equals += 1;
+        acc.equals += participants;
       }
       return acc;
     },
     { plus: 0, minus: 0, equals: 0 }
   );
+
+  // Статистика статусів (жовті та червоні)
+  const totalYellowCount = activities.reduce((sum, activity) => {
+    const activityYellow = activity.yellowCount || 0;
+    const detailsYellow = (activity.details || []).reduce(
+      (detailSum, detail) => detailSum + (detail.yellowCount || 0),
+      0
+    );
+    return sum + activityYellow + detailsYellow;
+  }, 0);
+
+  const totalRedCount = activities.reduce((sum, activity) => {
+    const activityRed = activity.redCount || 0;
+    const detailsRed = (activity.details || []).reduce(
+      (detailSum, detail) => detailSum + (detail.redCount || 0),
+      0
+    );
+    return sum + activityRed + detailsRed;
+  }, 0);
 
   // Статистика по закладах (тільки пішки)
   const establishmentStats = activities
@@ -285,8 +305,8 @@ function App() {
                   <span className="stat-label">🐷:</span>
                   <span className="stat-value">{totalPeopleByWalk}</span>
                 </div>
-                <div className="stat-item direction-stats">
-                  <span className="stat-label">Напрямки:</span>
+                <div className="stat-item">
+                  <span className="stat-label">Напрямок руху:</span>
                   <div className="direction-values">
                     <span className="direction-item">
                       <span className="direction-symbol">+</span>
@@ -301,6 +321,19 @@ function App() {
                       <span className="stat-value">
                         {directionStats.equals}
                       </span>
+                    </span>
+                  </div>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-label">Статуси:</span>
+                  <div className="direction-values">
+                    <span className="direction-item">
+                      <span className="direction-symbol">🟡</span>
+                      <span className="stat-value">{totalYellowCount}</span>
+                    </span>
+                    <span className="direction-item">
+                      <span className="direction-symbol">🔴</span>
+                      <span className="stat-value">{totalRedCount}</span>
                     </span>
                   </div>
                 </div>

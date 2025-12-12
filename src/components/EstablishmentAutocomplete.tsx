@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef, ChangeEvent } from 'react';
-import { getUniqueEstablishments } from '../services/activityService';
-import './NameAutocomplete.css';
+import React, { useState, useEffect, useRef, ChangeEvent } from "react";
+import { getUniqueEstablishments } from "../services/activityService";
+import "./NameAutocomplete.css";
 
 interface EstablishmentAutocompleteProps {
   value: string;
@@ -9,21 +9,30 @@ interface EstablishmentAutocompleteProps {
   required?: boolean;
 }
 
-function EstablishmentAutocomplete({ value, onChange, placeholder, required }: EstablishmentAutocompleteProps) {
+function EstablishmentAutocomplete({
+  value,
+  onChange,
+  placeholder,
+  required,
+}: EstablishmentAutocompleteProps) {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [allEstablishments, setAllEstablishments] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
-  const [inputValue, setInputValue] = useState<string>(value || '');
+  const [inputValue, setInputValue] = useState<string>(value || "");
+  const [loading, setLoading] = useState<boolean>(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   // Функція для завантаження унікальних закладів з бази даних
   const loadEstablishments = async (): Promise<void> => {
     try {
+      setLoading(true);
       const establishments = await getUniqueEstablishments();
       setAllEstablishments(establishments);
     } catch (error) {
-      console.error('Помилка завантаження закладів:', error);
+      console.error("Помилка завантаження закладів:", error);
       setAllEstablishments([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -33,27 +42,30 @@ function EstablishmentAutocomplete({ value, onChange, placeholder, required }: E
   }, []);
 
   useEffect(() => {
-    setInputValue(value || '');
+    setInputValue(value || "");
   }, [value]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+      if (
+        wrapperRef.current &&
+        !wrapperRef.current.contains(event.target as Node)
+      ) {
         setShowSuggestions(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
   const filterEstablishments = (query: string): string[] => {
-    if (!query || query.trim() === '') return allEstablishments;
-    
+    if (!query || query.trim() === "") return allEstablishments;
+
     const lowerQuery = query.toLowerCase();
-    return allEstablishments.filter(establishment => 
+    return allEstablishments.filter((establishment) =>
       establishment.toLowerCase().includes(lowerQuery)
     );
   };
@@ -61,9 +73,11 @@ function EstablishmentAutocomplete({ value, onChange, placeholder, required }: E
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const newValue = e.target.value;
     setInputValue(newValue);
-    onChange({ target: { name: 'establishment', value: newValue } } as ChangeEvent<HTMLInputElement>);
+    onChange({
+      target: { name: "establishment", value: newValue },
+    } as ChangeEvent<HTMLInputElement>);
 
-    if (newValue.trim() === '') {
+    if (newValue.trim() === "") {
       setSuggestions([]);
       setShowSuggestions(false);
     } else {
@@ -75,7 +89,9 @@ function EstablishmentAutocomplete({ value, onChange, placeholder, required }: E
 
   const handleSelectSuggestion = (suggestion: string): void => {
     setInputValue(suggestion);
-    onChange({ target: { name: 'establishment', value: suggestion } } as ChangeEvent<HTMLInputElement>);
+    onChange({
+      target: { name: "establishment", value: suggestion },
+    } as ChangeEvent<HTMLInputElement>);
     setShowSuggestions(false);
   };
 
@@ -97,9 +113,9 @@ function EstablishmentAutocomplete({ value, onChange, placeholder, required }: E
           // Оновлюємо список закладів при фокусі, щоб завжди мати актуальні дані
           const establishments = await getUniqueEstablishments();
           setAllEstablishments(establishments);
-          if (inputValue.trim() !== '') {
+          if (inputValue.trim() !== "") {
             const lowerQuery = inputValue.toLowerCase();
-            const filtered = establishments.filter(establishment => 
+            const filtered = establishments.filter((establishment) =>
               establishment.toLowerCase().includes(lowerQuery)
             );
             setSuggestions(filtered);
@@ -110,7 +126,7 @@ function EstablishmentAutocomplete({ value, onChange, placeholder, required }: E
           }
         }}
         onBlur={handleBlur}
-        placeholder={placeholder || 'Введіть заклад'}
+        placeholder={placeholder || "Введіть заклад"}
         className="form-input autocomplete-input"
         required={required}
       />
@@ -132,4 +148,3 @@ function EstablishmentAutocomplete({ value, onChange, placeholder, required }: E
 }
 
 export default EstablishmentAutocomplete;
-

@@ -1,7 +1,9 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
+import { toast } from "react-toastify";
 import "./ActivityFormRow.css";
 import NameAutocomplete from "./NameAutocomplete";
 import EstablishmentAutocomplete from "./EstablishmentAutocomplete";
+import StatusSelectorPopup from "./StatusSelectorPopup";
 import { Activity, CreateActivityDto, FormData } from "../types";
 
 interface ActivityFormRowProps {
@@ -27,6 +29,10 @@ function ActivityFormRow({
     time: getCurrentTime(),
     participantsCount: "",
     transportType: "walk",
+    greenCount: "",
+    yellowCount: "",
+    redCount: "",
+    direction: "",
     coordinates: "",
     mainPerson: "",
     establishment: "",
@@ -45,6 +51,10 @@ function ActivityFormRow({
         time: timeValue,
         participantsCount: editingActivity.participantsCount?.toString() || "",
         transportType: editingActivity.transportType || "walk",
+        greenCount: editingActivity.greenCount?.toString() || "",
+        yellowCount: editingActivity.yellowCount?.toString() || "",
+        redCount: editingActivity.redCount?.toString() || "",
+        direction: editingActivity.direction || "",
         coordinates: editingActivity.coordinates || "",
         mainPerson: editingActivity.mainPerson || "",
         establishment: editingActivity.establishment || "",
@@ -58,6 +68,10 @@ function ActivityFormRow({
         time: getCurrentTime(),
         participantsCount: "",
         transportType: "walk",
+        greenCount: "",
+        yellowCount: "",
+        redCount: "",
+        direction: "",
         coordinates: "",
         mainPerson: "",
         establishment: "",
@@ -91,14 +105,8 @@ function ActivityFormRow({
   const handleSubmit = async (e: FormEvent): Promise<void> => {
     e.preventDefault();
     // Перевірка обов'язкових полів
-    if (
-      !formData.time ||
-      !formData.mainPerson ||
-      formData.mainPerson.trim() === ""
-    ) {
-      alert(
-        "Будь ласка, заповніть обов'язкові поля: час та Стрім в активності"
-      );
+    if (!formData.time) {
+      alert("Будь ласка, заповніть обов'язкові поля: час в активності");
       return;
     }
 
@@ -116,6 +124,15 @@ function ActivityFormRow({
       transportType:
         formData.transportType === "walk" || formData.transportType === "car"
           ? formData.transportType
+          : null,
+      greenCount: formData.greenCount ? parseInt(formData.greenCount) : null,
+      yellowCount: formData.yellowCount ? parseInt(formData.yellowCount) : null,
+      redCount: formData.redCount ? parseInt(formData.redCount) : null,
+      direction:
+        formData.direction === "+" ||
+        formData.direction === "-" ||
+        formData.direction === "="
+          ? formData.direction
           : null,
       coordinates: formData.coordinates.trim() || null,
       establishment: formData.establishment.trim() || null,
@@ -135,6 +152,10 @@ function ActivityFormRow({
           time: getCurrentTime(),
           participantsCount: "",
           transportType: "walk",
+          greenCount: "",
+          yellowCount: "",
+          redCount: "",
+          direction: "",
           coordinates: "",
           mainPerson: "",
           establishment: "",
@@ -156,6 +177,10 @@ function ActivityFormRow({
       time: getCurrentTime(),
       participantsCount: "",
       transportType: "walk",
+      greenCount: "",
+      yellowCount: "",
+      redCount: "",
+      direction: "",
       coordinates: "",
       mainPerson: "",
       establishment: "",
@@ -172,14 +197,79 @@ function ActivityFormRow({
     }));
   };
 
+  const [showStatusPopup, setShowStatusPopup] = useState(false);
+  const [clipboardLink, setClipboardLink] = useState<string>("");
+
+  const handleCheckClipboard = async (): Promise<void> => {
+    try {
+      const text = await navigator.clipboard.readText();
+      setClipboardLink(text);
+    } catch (error) {
+      setClipboardLink("");
+    }
+  };
+
+  // Перевіряємо буфер обміну при завантаженні та коли змінюється formData.link
+  useEffect(() => {
+    handleCheckClipboard();
+  }, [formData.link]);
+
+  const isValidUrl = (string: string): boolean => {
+    try {
+      const url = new URL(string);
+      return url.protocol === "http:" || url.protocol === "https:";
+    } catch (_) {
+      return false;
+    }
+  };
+
+  const handlePasteLink = async (): Promise<void> => {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (!isValidUrl(text)) {
+        toast.error(`"${text}" не є валідним посиланням!`);
+        return;
+      }
+      setFormData((prev) => ({
+        ...prev,
+        link: text,
+      }));
+      toast.success(`Посилання "${text}" успішно вставлено!`);
+    } catch (error) {
+      // Fallback для старих браузерів
+      const textArea = document.createElement("textarea");
+      textArea.style.position = "fixed";
+      textArea.style.left = "-999999px";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        if (document.execCommand("paste")) {
+          const text = textArea.value;
+          if (!isValidUrl(text)) {
+            toast.error(`"${text}" не є валідним посиланням!`);
+            document.body.removeChild(textArea);
+            return;
+          }
+          setFormData((prev) => ({
+            ...prev,
+            link: text,
+          }));
+          toast.success(`Посилання "${text}" успішно вставлено!`);
+        }
+      } catch (err) {
+        console.error("Помилка читання з буфера обміну:", err);
+        toast.error("Помилка вставки з буфера обміну");
+      }
+      document.body.removeChild(textArea);
+    }
+  };
+
   // Генеруємо опції для кількості людей (1-10)
   const participantsOptions = Array.from({ length: 10 }, (_, i) => i + 1);
 
   return (
     <tr className="form-row">
-      <td className="form-cell">
-        {editingActivity ? editingActivity.id : "—"}
-      </td>
       <td className="form-cell time-cell">
         <div className="time-input-wrapper">
           <input
@@ -227,6 +317,73 @@ function ActivityFormRow({
           <option value="car">🚗</option>
         </select>
       </td>
+      <td className="form-cell status-cell">
+        <div
+          className={`status-trigger ${
+            formData.greenCount || formData.yellowCount || formData.redCount
+              ? "has-status"
+              : ""
+          }`}
+          onClick={() => setShowStatusPopup(true)}
+        >
+          <div className="status-trigger-content">
+            {formData.greenCount ||
+            formData.yellowCount ||
+            formData.redCount ? (
+              <>
+                {formData.greenCount && (
+                  <span className="status-trigger-item status-green">
+                    {formData.greenCount}●
+                  </span>
+                )}
+                {formData.yellowCount && (
+                  <span className="status-trigger-item status-yellow">
+                    {formData.yellowCount}●
+                  </span>
+                )}
+                {formData.redCount && (
+                  <span className="status-trigger-item status-red">
+                    {formData.redCount}●
+                  </span>
+                )}
+              </>
+            ) : (
+              <span>Вибрати</span>
+            )}
+          </div>
+        </div>
+        {showStatusPopup && (
+          <StatusSelectorPopup
+            greenCount={formData.greenCount}
+            yellowCount={formData.yellowCount}
+            redCount={formData.redCount}
+            onGreenChange={(value) =>
+              setFormData((prev) => ({ ...prev, greenCount: value }))
+            }
+            onYellowChange={(value) =>
+              setFormData((prev) => ({ ...prev, yellowCount: value }))
+            }
+            onRedChange={(value) =>
+              setFormData((prev) => ({ ...prev, redCount: value }))
+            }
+            onClose={() => setShowStatusPopup(false)}
+            participantsOptions={participantsOptions}
+          />
+        )}
+      </td>
+      <td className="form-cell">
+        <select
+          name="direction"
+          value={formData.direction}
+          onChange={handleChange}
+          className="form-input form-select"
+        >
+          <option value="">—</option>
+          <option value="+">+</option>
+          <option value="-">-</option>
+          <option value="=">=</option>
+        </select>
+      </td>
       <td className="form-cell">
         <EstablishmentAutocomplete
           value={formData.establishment}
@@ -265,14 +422,27 @@ function ActivityFormRow({
         </select>
       </td>
       <td className="form-cell">
-        <input
-          type="url"
-          name="link"
-          value={formData.link}
-          onChange={handleChange}
-          placeholder="Посилання"
-          className="form-input"
-        />
+        <input type="hidden" name="link" value={formData.link} />
+        <button
+          type="button"
+          className={`btn-paste-link ${
+            (clipboardLink && isValidUrl(clipboardLink)) ||
+            (formData.link && isValidUrl(formData.link))
+              ? "has-link"
+              : ""
+          }`}
+          onClick={handlePasteLink}
+          onMouseEnter={handleCheckClipboard}
+          title={
+            clipboardLink
+              ? `Вставити: ${clipboardLink}`
+              : formData.link
+              ? `Посилання: ${formData.link}`
+              : "Вставити з буфера обміну"
+          }
+        >
+          📋
+        </button>
       </td>
       <td className="form-cell">
         <input

@@ -8,14 +8,18 @@ import {
   createActivity,
   updateActivity,
   deleteActivity,
-  downloadMarkdown,
+  copyMarkdownToClipboard,
+  addDetailToActivity,
+  deleteDetailFromActivity,
 } from "./services/activityService";
-import { Activity, CreateActivityDto } from "./types";
+import { toast } from "react-toastify";
+import { Activity, CreateActivityDto, CreateDetailDto } from "./types";
 
 function App() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [showDetailedStats, setShowDetailedStats] = useState<boolean>(false);
   const [showEstablishmentStats, setShowEstablishmentStats] =
     useState<boolean>(false);
 
@@ -89,12 +93,39 @@ function App() {
     setEditingActivity(null);
   };
 
+  const handleAddDetail = async (
+    activityId: number,
+    detailData: CreateDetailDto
+  ): Promise<void> => {
+    try {
+      await addDetailToActivity(activityId, detailData);
+      await loadActivities();
+    } catch (error) {
+      console.error("Помилка додавання деталі:", error);
+      alert("Помилка додавання деталі");
+    }
+  };
+
+  const handleDeleteDetail = async (
+    activityId: number,
+    detailId: number
+  ): Promise<void> => {
+    try {
+      await deleteDetailFromActivity(activityId, detailId);
+      await loadActivities();
+    } catch (error) {
+      console.error("Помилка видалення деталі:", error);
+      alert("Помилка видалення деталі");
+    }
+  };
+
   const handleExport = async (): Promise<void> => {
     try {
-      await downloadMarkdown();
+      await copyMarkdownToClipboard();
+      toast.success("Markdown скопійовано в буфер обміну!");
     } catch (error) {
-      console.error("Помилка експорту:", error);
-      alert("Помилка експорту даних");
+      console.error("Помилка копіювання:", error);
+      toast.error("Помилка копіювання в буфер обміну");
     }
   };
 
@@ -113,6 +144,21 @@ function App() {
     return sum;
   }, 0);
 
+  // Статистика напрямків (загальна)
+  const directionStats = activities.reduce(
+    (acc, activity) => {
+      if (activity.direction === "+") {
+        acc.plus += 1;
+      } else if (activity.direction === "-") {
+        acc.minus += 1;
+      } else if (activity.direction === "=") {
+        acc.equals += 1;
+      }
+      return acc;
+    },
+    { plus: 0, minus: 0, equals: 0 }
+  );
+
   // Статистика по закладах (тільки пішки)
   const establishmentStats = activities
     .filter(
@@ -124,12 +170,20 @@ function App() {
         acc[establishment] = {
           events: 0,
           people: 0,
+          directions: { plus: 0, minus: 0, equals: 0 },
         };
       }
       acc[establishment].events += 1;
       acc[establishment].people += activity.participantsCount || 0;
+      if (activity.direction === "+") {
+        acc[establishment].directions.plus += 1;
+      } else if (activity.direction === "-") {
+        acc[establishment].directions.minus += 1;
+      } else if (activity.direction === "=") {
+        acc[establishment].directions.equals += 1;
+      }
       return acc;
-    }, {} as Record<string, { events: number; people: number }>);
+    }, {} as Record<string, { events: number; people: number; directions: { plus: number; minus: number; equals: number } }>);
 
   const establishmentStatsArray = Object.entries(establishmentStats)
     .map(([establishment, stats]) => ({
@@ -154,51 +208,97 @@ function App() {
       />
       <header className="App-header">
         <div className="stats-container">
-          <div className="stat-item">
+          <div
+            className="stat-item stat-label stat-toggle"
+            style={{ cursor: "pointer", userSelect: "none" }}
+            onClick={() => setShowDetailedStats(!showDetailedStats)}
+          >
             <span className="stat-label">Переміщень:</span>
             <span className="stat-value">{totalActivities}</span>
+            <span className="toggle-icon">{showDetailedStats ? "▼" : "▶"}</span>
           </div>
           <div className="stat-item">
-            <span className="stat-label">🚗:</span>
-            <span className="stat-value">{totalPeopleByCar}</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-label">🐷:</span>
-            <span className="stat-value">{totalPeopleByWalk}</span>
-          </div>
-          {establishmentStatsArray.length > 0 && (
-            <div className="stat-item establishment-stats">
-              <div
-                className="stat-label establishment-toggle"
-                onClick={() =>
-                  setShowEstablishmentStats(!showEstablishmentStats)
-                }
-                style={{ cursor: "pointer", userSelect: "none" }}
-              >
-                <span>Заклади (🐷):</span>
-                <span className="toggle-icon">
-                  {showEstablishmentStats ? "▼" : "▶"}
-                </span>
-              </div>
-              {showEstablishmentStats && (
-                <div className="establishment-list">
-                  {establishmentStatsArray.map((stat) => (
-                    <div
-                      key={stat.establishment}
-                      className="establishment-stat-item"
-                    >
-                      <span className="establishment-name">
-                        {stat.establishment}:
+            {showDetailedStats && (
+              <div className="detailed-stats">
+                <div className="stat-item">
+                  <span className="stat-label">🚗:</span>
+                  <span className="stat-value">{totalPeopleByCar}</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-label">🐷:</span>
+                  <span className="stat-value">{totalPeopleByWalk}</span>
+                </div>
+                <div className="stat-item direction-stats">
+                  <span className="stat-label">Напрямки:</span>
+                  <div className="direction-values">
+                    <span className="direction-item">
+                      <span className="direction-symbol">+</span>
+                      <span className="stat-value">{directionStats.plus}</span>
+                    </span>
+                    <span className="direction-item">
+                      <span className="direction-symbol">-</span>
+                      <span className="stat-value">{directionStats.minus}</span>
+                    </span>
+                    <span className="direction-item">
+                      <span className="direction-symbol">=</span>
+                      <span className="stat-value">
+                        {directionStats.equals}
                       </span>
-                      <span className="establishment-values">
-                        {stat.events} подій, {stat.people} 🐷
+                    </span>
+                  </div>
+                </div>
+                {establishmentStatsArray.length > 0 && (
+                  <div className="stat-item establishment-stats">
+                    <div
+                      className="stat-label establishment-toggle"
+                      onClick={() =>
+                        setShowEstablishmentStats(!showEstablishmentStats)
+                      }
+                      style={{ cursor: "pointer", userSelect: "none" }}
+                    >
+                      <span>Заклади (🐷):</span>
+                      <span className="toggle-icon">
+                        {showEstablishmentStats ? "▼" : "▶"}
                       </span>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+                    {showEstablishmentStats && (
+                      <div className="establishment-list">
+                        {establishmentStatsArray.map((stat) => (
+                          <div
+                            key={stat.establishment}
+                            className="establishment-stat-item"
+                          >
+                            <div className="establishment-header">
+                              <span className="establishment-name">
+                                {stat.establishment}:
+                              </span>
+                              <span className="establishment-values">
+                                {stat.events} подій, {stat.people} 🐷
+                              </span>
+                            </div>
+                            <div className="establishment-directions">
+                              <span className="direction-item">
+                                <span className="direction-symbol">+</span>
+                                <span>{stat.directions.plus}</span>
+                              </span>
+                              <span className="direction-item">
+                                <span className="direction-symbol">-</span>
+                                <span>{stat.directions.minus}</span>
+                              </span>
+                              <span className="direction-item">
+                                <span className="direction-symbol">=</span>
+                                <span>{stat.directions.equals}</span>
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
         <button
           className="btn btn-primary export-btn"
@@ -221,6 +321,8 @@ function App() {
               onCreate={handleCreate}
               editingActivity={editingActivity}
               onCancelEdit={handleCancelEdit}
+              onAddDetail={handleAddDetail}
+              onDeleteDetail={handleDeleteDetail}
             />
           )}
         </div>

@@ -1,36 +1,38 @@
-import React, { useState, useEffect, ChangeEvent } from "react";
+import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { toast } from "react-toastify";
 import "./ActivityFormRow.css";
 import NameAutocomplete from "./NameAutocomplete";
-import EstablishmentAutocomplete from "./EstablishmentAutocomplete";
 import StatusSelectorPopup from "./StatusSelectorPopup";
-import { Activity, CreateActivityDto, FormData } from "../types";
+import { CreateDetailDto, FormData } from "../types";
 
-interface EditableActivityRowProps {
-  activity: Activity;
-  onSave: (id: number, data: CreateActivityDto) => Promise<void>;
-  onCancel: () => void;
+interface DetailsFormRowProps {
+  parentId: number;
+  onSubmit: (activityId: number, data: CreateDetailDto) => Promise<void>;
 }
 
-function EditableActivityRow({
-  activity,
-  onSave,
-  onCancel,
-}: EditableActivityRowProps) {
+function DetailsFormRow({ parentId, onSubmit }: DetailsFormRowProps) {
+  // Функція для отримання поточного часу
+  const getCurrentTime = (): string => {
+    const now = new Date();
+    const hour = String(now.getHours()).padStart(2, "0");
+    const minute = String(now.getMinutes()).padStart(2, "0");
+    return `${hour}:${minute}`;
+  };
+
   const [formData, setFormData] = useState<FormData>({
-    time: `${activity.hour || "00"}:${activity.minute || "00"}`,
-    participantsCount: activity.participantsCount?.toString() || "",
-    transportType: activity.transportType || "walk",
-    greenCount: activity.greenCount?.toString() || "",
-    yellowCount: activity.yellowCount?.toString() || "",
-    redCount: activity.redCount?.toString() || "",
-    direction: activity.direction || "",
-    coordinates: activity.coordinates || "",
-    mainPerson: activity.mainPerson || "",
-    establishment: activity.establishment || "",
-    department: activity.department || "",
-    link: activity.link || "",
-    comment: activity.comment || "",
+    time: getCurrentTime(),
+    participantsCount: "",
+    transportType: "walk",
+    greenCount: "",
+    yellowCount: "",
+    redCount: "",
+    direction: "",
+    coordinates: "",
+    mainPerson: "",
+    establishment: "",
+    department: "",
+    link: "",
+    comment: "",
   });
 
   const handleChange = (
@@ -47,13 +49,8 @@ function EditableActivityRow({
     handleChange(e);
   };
 
-  const handleEstablishmentChange = (
-    e: ChangeEvent<HTMLInputElement>
-  ): void => {
-    handleChange(e);
-  };
-
-  const handleSave = async (): Promise<void> => {
+  const handleSubmit = async (e: FormEvent): Promise<void> => {
+    e.preventDefault();
     // Перевірка обов'язкових полів
     if (!formData.time) {
       alert("Будь ласка, заповніть обов'язкові поля: час в активності");
@@ -64,41 +61,49 @@ function EditableActivityRow({
     const [hour, minute] = formData.time.split(":");
 
     // Підготовка даних для відправки
-    const submitData: CreateActivityDto = {
+    const submitData: CreateDetailDto = {
       hour: hour,
       minute: minute,
       mainPerson: formData.mainPerson.trim(),
       participantsCount: formData.participantsCount
         ? parseInt(formData.participantsCount)
         : null,
-      transportType:
-        formData.transportType === "walk" || formData.transportType === "car"
-          ? formData.transportType
-          : null,
+      coordinates: formData.coordinates.trim() || null,
       greenCount: formData.greenCount ? parseInt(formData.greenCount) : null,
       yellowCount: formData.yellowCount ? parseInt(formData.yellowCount) : null,
       redCount: formData.redCount ? parseInt(formData.redCount) : null,
-      direction:
-        formData.direction === "+" ||
-        formData.direction === "-" ||
-        formData.direction === "="
-          ? formData.direction
-          : null,
-      coordinates: formData.coordinates.trim() || null,
-      establishment: formData.establishment.trim() || null,
-      department:
-        formData.department === "літуни" || formData.department === "тіхоні"
-          ? formData.department
-          : null,
       link: formData.link.trim() || null,
       comment: formData.comment.trim() || null,
     };
 
     try {
-      await onSave(activity.id, submitData);
+      await onSubmit(parentId, submitData);
+      // Очищаємо форму після успішного додавання, але зберігаємо поточний час
+      setFormData({
+        time: getCurrentTime(),
+        participantsCount: "",
+        transportType: "walk",
+        greenCount: "",
+        yellowCount: "",
+        redCount: "",
+        direction: "",
+        coordinates: "",
+        mainPerson: "",
+        establishment: "",
+        department: "",
+        link: "",
+        comment: "",
+      });
     } catch (error) {
       // Помилка вже оброблена в App.tsx
     }
+  };
+
+  const handleRefreshTime = (): void => {
+    setFormData((prev) => ({
+      ...prev,
+      time: getCurrentTime(),
+    }));
   };
 
   const [showStatusPopup, setShowStatusPopup] = useState(false);
@@ -173,7 +178,7 @@ function EditableActivityRow({
   };
 
   return (
-    <tr className="form-row editing-row">
+    <tr className="form-row">
       <td className="form-cell time-cell">
         <div className="time-input-wrapper">
           <input
@@ -184,6 +189,14 @@ function EditableActivityRow({
             className="form-input time-input"
             required
           />
+          <button
+            type="button"
+            onClick={handleRefreshTime}
+            className="btn-time-refresh"
+            title="Оновити на поточний час"
+          >
+            ↻
+          </button>
         </div>
       </td>
       <td className="form-cell">
@@ -201,17 +214,23 @@ function EditableActivityRow({
           ))}
         </select>
       </td>
-      <td className="form-cell transport-cell">
-        <select
-          name="transportType"
-          value={formData.transportType}
+      <td className="form-cell">
+        <input
+          type="text"
+          name="coordinates"
+          value={formData.coordinates}
           onChange={handleChange}
-          className="form-input form-select transport-select"
-        >
-          <option value="">—</option>
-          <option value="walk">🐷</option>
-          <option value="car">🚗</option>
-        </select>
+          placeholder="Координати"
+          className="form-input"
+        />
+      </td>
+      <td className="form-cell">
+        <NameAutocomplete
+          value={formData.mainPerson}
+          onChange={handleNameChange}
+          placeholder="Стрім"
+          required
+        />
       </td>
       <td className="form-cell status-cell">
         <div
@@ -268,56 +287,6 @@ function EditableActivityRow({
         )}
       </td>
       <td className="form-cell">
-        <select
-          name="direction"
-          value={formData.direction}
-          onChange={handleChange}
-          className="form-input form-select"
-        >
-          <option value="">—</option>
-          <option value="+">+</option>
-          <option value="-">-</option>
-          <option value="=">=</option>
-        </select>
-      </td>
-      <td className="form-cell">
-        <EstablishmentAutocomplete
-          value={formData.establishment}
-          onChange={handleEstablishmentChange}
-          placeholder="Заклад"
-        />
-      </td>
-      <td className="form-cell">
-        <input
-          type="text"
-          name="coordinates"
-          value={formData.coordinates}
-          onChange={handleChange}
-          placeholder="Координати"
-          className="form-input"
-        />
-      </td>
-      <td className="form-cell">
-        <NameAutocomplete
-          value={formData.mainPerson}
-          onChange={handleNameChange}
-          placeholder="Стрім"
-          required
-        />
-      </td>
-      <td className="form-cell">
-        <select
-          name="department"
-          value={formData.department}
-          onChange={handleChange}
-          className="form-input form-select"
-        >
-          <option value="">—</option>
-          <option value="літуни">Літуни</option>
-          <option value="тіхоні">Тіхоні</option>
-        </select>
-      </td>
-      <td className="form-cell">
         <input type="hidden" name="link" value={formData.link} />
         <button
           type="button"
@@ -354,19 +323,11 @@ function EditableActivityRow({
         <div className="form-row-actions">
           <button
             type="button"
-            onClick={handleSave}
+            onClick={handleSubmit}
             className="btn btn-success btn-sm"
-            title="Зберегти"
+            title="Додати"
           >
-            ✓
-          </button>
-          <button
-            type="button"
-            onClick={onCancel}
-            className="btn btn-secondary btn-sm"
-            title="Скасувати"
-          >
-            ✕
+            +
           </button>
         </div>
       </td>
@@ -374,4 +335,4 @@ function EditableActivityRow({
   );
 }
 
-export default EditableActivityRow;
+export default DetailsFormRow;

@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef, ChangeEvent } from 'react';
-import { getUniqueMainPersons } from '../services/activityService';
-import './NameAutocomplete.css';
+import React, { useState, useEffect, useRef, ChangeEvent } from "react";
+import { getUniqueMainPersons } from "../services/activityService";
+import "./NameAutocomplete.css";
 
 interface NameAutocompleteProps {
   value: string;
@@ -9,21 +9,30 @@ interface NameAutocompleteProps {
   required?: boolean;
 }
 
-function NameAutocomplete({ value, onChange, placeholder, required }: NameAutocompleteProps) {
+function NameAutocomplete({
+  value,
+  onChange,
+  placeholder,
+  required,
+}: NameAutocompleteProps) {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [allNames, setAllNames] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
-  const [inputValue, setInputValue] = useState<string>(value || '');
+  const [inputValue, setInputValue] = useState<string>(value || "");
+  const [loading, setLoading] = useState<boolean>(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   // Функція для завантаження унікальних імен з бази даних
   const loadNames = async (): Promise<void> => {
     try {
+      setLoading(true);
       const names = await getUniqueMainPersons();
       setAllNames(names);
     } catch (error) {
-      console.error('Помилка завантаження імен:', error);
+      console.error("Помилка завантаження імен:", error);
       setAllNames([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -33,37 +42,40 @@ function NameAutocomplete({ value, onChange, placeholder, required }: NameAutoco
   }, []);
 
   useEffect(() => {
-    setInputValue(value || '');
+    setInputValue(value || "");
   }, [value]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+      if (
+        wrapperRef.current &&
+        !wrapperRef.current.contains(event.target as Node)
+      ) {
         setShowSuggestions(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
   const filterNames = (query: string): string[] => {
-    if (!query || query.trim() === '') return allNames;
-    
+    if (!query || query.trim() === "") return allNames;
+
     const lowerQuery = query.toLowerCase();
-    return allNames.filter(name => 
-      name.toLowerCase().includes(lowerQuery)
-    );
+    return allNames.filter((name) => name.toLowerCase().includes(lowerQuery));
   };
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const newValue = e.target.value;
     setInputValue(newValue);
-    onChange({ target: { name: 'mainPerson', value: newValue } } as ChangeEvent<HTMLInputElement>);
+    onChange({
+      target: { name: "mainPerson", value: newValue },
+    } as ChangeEvent<HTMLInputElement>);
 
-    if (newValue.trim() === '') {
+    if (newValue.trim() === "") {
       setSuggestions([]);
       setShowSuggestions(false);
     } else {
@@ -75,7 +87,9 @@ function NameAutocomplete({ value, onChange, placeholder, required }: NameAutoco
 
   const handleSelectSuggestion = (suggestion: string): void => {
     setInputValue(suggestion);
-    onChange({ target: { name: 'mainPerson', value: suggestion } } as ChangeEvent<HTMLInputElement>);
+    onChange({
+      target: { name: "mainPerson", value: suggestion },
+    } as ChangeEvent<HTMLInputElement>);
     setShowSuggestions(false);
   };
 
@@ -97,9 +111,9 @@ function NameAutocomplete({ value, onChange, placeholder, required }: NameAutoco
           // Оновлюємо список імен при фокусі, щоб завжди мати актуальні дані
           const names = await getUniqueMainPersons();
           setAllNames(names);
-          if (inputValue.trim() !== '') {
+          if (inputValue.trim() !== "") {
             const lowerQuery = inputValue.toLowerCase();
-            const filtered = names.filter(name => 
+            const filtered = names.filter((name) =>
               name.toLowerCase().includes(lowerQuery)
             );
             setSuggestions(filtered);
@@ -110,7 +124,7 @@ function NameAutocomplete({ value, onChange, placeholder, required }: NameAutoco
           }
         }}
         onBlur={handleBlur}
-        placeholder={placeholder || 'Введіть ім\'я'}
+        placeholder={placeholder || "Введіть ім'я"}
         className="form-input autocomplete-input"
         required={required}
       />
@@ -132,4 +146,3 @@ function NameAutocomplete({ value, onChange, placeholder, required }: NameAutoco
 }
 
 export default NameAutocomplete;
-
